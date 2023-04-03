@@ -3,6 +3,7 @@ import 'leaflet/dist/leaflet.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Modal } from 'bootstrap';
 import L from 'leaflet';
+
 import { doGraphQLFetch } from './graphql/fetch';
 import createModalHtml from './domFunctions/createModalHtml';
 // Use the leaflet.js library to show the location on the map (https://leafletjs.com/)
