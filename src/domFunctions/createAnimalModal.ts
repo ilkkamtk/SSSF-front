@@ -1,7 +1,9 @@
-export default function createModalHtml(animal: any): string {
+export default function (animal: any): string {
   const modalHtml = `
   <div class="modal-header">
-    <h5 class="modal-title" id="exampleModalLabel">${animal.animal_name}</h5>
+    <h5 class="modal-title" id="exampleModalLabel">Animal: ${
+      animal.animal_name
+    }</h5>
     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
   </div>
   <div class="modal-body">

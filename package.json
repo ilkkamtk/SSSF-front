@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "bootstrap": "^5.2.3",
+    "geojson": "^0.5.0",
     "leaflet": "^1.9.3",
     "vite-plugin-static-copy": "^0.13.1"
   }

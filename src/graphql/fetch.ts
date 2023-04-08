@@ -1,9 +1,22 @@
-const doGraphQLFetch = async (url: string, query: string, variables: any) => {
+const doGraphQLFetch = async (
+  url: string,
+  query: string,
+  variables: object,
+  token?: string,
+) => {
+  const headers: HeadersInit = {
+    'Content-Type': 'application/json',
+  };
+
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  console.log('headers', headers, query, token);
+
   const response = await fetch(url, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers,
     body: JSON.stringify({
       query,
       variables,
