@@ -4,6 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import L from 'leaflet';
 import { doGraphQLFetch } from './graphql/fetch';
 import {
+  addAnimal,
   addCategory,
   addSpecies,
   checkToken,
@@ -22,9 +23,12 @@ import LoginMessageResponse from './interfaces/LoginMessageResponse';
 import createMessageModal from './domFunctions/createMessageModal';
 import { User } from './interfaces/User';
 import updateUserPanel from './domFunctions/updateUserPanel';
+import { UploadResponse } from './interfaces/UploadResponse';
+import { Point } from 'geojson';
 
 // Global variables
 const apiURL = import.meta.env.VITE_API_URL;
+const uploadURL = import.meta.env.VITE_UPLOAD_URL;
 const user: User = {};
 const myModal = new Modal('#animal-modal');
 
@@ -37,6 +41,7 @@ const loginButton = document.querySelector(
 const logoutButton = document.querySelector(
   '#logout-button',
 ) as HTMLButtonElement;
+const forms = document.querySelector('#forms') as HTMLDivElement;
 
 // Use the leaflet.js library to show the location on the map (https://leafletjs.com/)
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -52,13 +57,17 @@ const token = localStorage.getItem('token');
 if (token !== null) {
   try {
     const isTokenValid = await doGraphQLFetch(apiURL, checkToken, {}, token);
-    if (isTokenValid.checkToken.message === 'Token valid') {
+    if (isTokenValid.checkToken?.message === 'Token is valid') {
+      console.log('token valid');
       loginButton.parentElement!.classList.add('d-none');
       logoutButton.parentElement!.classList.remove('d-none');
+      forms.classList.remove('d-none');
       user.user_name = isTokenValid.checkToken.user.user_name;
       updateUserPanel(user);
     }
-  } catch (error) {}
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 // update animals
@@ -86,7 +95,6 @@ const updateSpecies = async () => {
 
 // update categories
 const updateCategories = async () => {
-  console.log('update categories');
   // populate the #category-list datalist
   const categoryData = await doGraphQLFetch(apiURL, getAllCategories, {});
   const categoryList = document.querySelector(
@@ -116,18 +124,24 @@ loginButton.addEventListener('click', async () => {
       password: password.value,
     };
 
-    const loginData = (await doGraphQLFetch(apiURL, login, {
-      credentials,
-    })) as LoginMessageResponse;
-    targetModal.innerHTML = createMessageModal(loginData.login.message);
-    setTimeout(() => {
-      myModal.hide();
-    }, 2000);
-    loginButton.parentElement!.classList.add('d-none');
-    logoutButton.parentElement!.classList.remove('d-none');
-    localStorage.setItem('token', loginData.login.token!);
-    user.user_name = loginData.login.user.user_name!;
-    updateUserPanel(user);
+    try {
+      const loginData = (await doGraphQLFetch(apiURL, login, {
+        credentials,
+      })) as LoginMessageResponse;
+      console.log(loginData);
+      targetModal.innerHTML = createMessageModal(loginData.login.message);
+      setTimeout(() => {
+        myModal.hide();
+      }, 2000);
+      loginButton.parentElement!.classList.add('d-none');
+      logoutButton.parentElement!.classList.remove('d-none');
+      forms.classList.remove('d-none');
+      localStorage.setItem('token', loginData.login.token!);
+      user.user_name = loginData.login.user.user_name!;
+      updateUserPanel(user);
+    } catch (error) {
+      console.log(error);
+    }
   });
 });
 
@@ -149,7 +163,6 @@ const getActiveForm = () => {
   if (activeFormId) {
     activeForm = document.querySelector(`${activeFormId} form`);
   }
-  console.log(activeForm);
 };
 
 // call getActiveForm when the accordion is clicked
@@ -196,23 +209,27 @@ addCategoryForm.addEventListener('submit', async (e) => {
   const category = addCategoryForm.querySelector(
     '#category-name',
   ) as HTMLInputElement;
-  const categoryData = await doGraphQLFetch(
-    apiURL,
-    addCategory,
-    {
-      categoryName: category.value,
-    },
-    localStorage.getItem('token')!,
-  );
-  categoryData.addCategory.category_name === category.value &&
-    updateCategories();
-  targetModal.innerHTML = createMessageModal('Category added');
-  myModal.show();
-  setTimeout(() => {
-    myModal.hide();
-  }, 2000);
-  // clear form
-  addCategoryForm.reset();
+  try {
+    const categoryData = await doGraphQLFetch(
+      apiURL,
+      addCategory,
+      {
+        categoryName: category.value,
+      },
+      localStorage.getItem('token')!,
+    );
+    categoryData.addCategory.category_name === category.value &&
+      updateCategories();
+    targetModal.innerHTML = createMessageModal('Category added');
+    myModal.show();
+    setTimeout(() => {
+      myModal.hide();
+    }, 2000);
+    // clear form
+    addCategoryForm.reset();
+  } catch (error) {
+    console.log(error);
+  }
 });
 
 // add species
@@ -254,6 +271,77 @@ addSpeciesForm.addEventListener('submit', async (e) => {
   }, 2000);
   // clear form
   addSpeciesForm.reset();
+});
+
+// add animal
+const addAnimalForm = document.querySelector(
+  '#add-animal-form',
+) as HTMLFormElement;
+addAnimalForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const token = localStorage.getItem('token') as string;
+  // upload image
+  const image = addAnimalForm.querySelector('#image') as HTMLInputElement;
+  const imageFile = image.files![0];
+  const formData = new FormData();
+  formData.append('animal', imageFile);
+  const imageUpload = await fetch(`${uploadURL}/upload`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+  });
+
+  const imageUploadData = (await imageUpload.json()) as UploadResponse;
+
+  const animal = addAnimalForm.querySelector(
+    '#animal-name',
+  ) as HTMLInputElement;
+  const species = addAnimalForm.querySelector('#species') as HTMLInputElement;
+  const speciesOption = document.querySelector(
+    `#species-list option[value="${species.value}"]`,
+  ) as HTMLElement;
+  const species_id = speciesOption.dataset.id;
+
+  // if locationCheck is checked, get location from image file else get location from input
+  const locationCheck = document.querySelector(
+    '#get-from-image',
+  ) as HTMLInputElement;
+  let locationData: Point;
+  if (locationCheck.checked) {
+    locationData = imageUploadData.data.location;
+  } else {
+    const location = addAnimalForm.querySelector(
+      '#animal-location',
+    ) as HTMLInputElement;
+    locationData = JSON.parse(location.value);
+  }
+
+  const birthdate = addAnimalForm.querySelector(
+    '#birthdate',
+  ) as HTMLInputElement;
+  const birthdateData = new Date(birthdate.value);
+  const animalData = await doGraphQLFetch(
+    apiURL,
+    addAnimal,
+    {
+      animalName: animal.value,
+      location: locationData,
+      species: species_id,
+      birthdate: birthdateData,
+      image: imageUploadData.data.filename,
+    },
+    token,
+  );
+  animalData.addAnimal.animal_name === animal.value && updateAnimals();
+  targetModal.innerHTML = createMessageModal('Animal added');
+  myModal.show();
+  setTimeout(() => {
+    myModal.hide();
+  }, 2000);
+  // clear form
+  addAnimalForm.reset();
 });
 
 // initialize the app

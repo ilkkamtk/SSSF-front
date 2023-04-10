@@ -2,10 +2,10 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="src/main.ts" defer type="module"></script>
+  <meta charset="UTF-8">
+  <link rel="icon" type="image/svg+xml" href="/vite.svg">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="src/main.ts" type="module"></script>
   <title>Vite + TS</title>
 </head>
 
@@ -41,7 +41,7 @@
           <div id="map"></div>
         </div>
       </div>
-      <div class="row">
+      <div class="row d-none" id="forms">
         <div class="col">
           <!-- bootstrap accordion with three forms, add animals, add species, add category -->
           <div class="accordion" id="accordionExample">
@@ -55,8 +55,8 @@
                 <div class="accordion-body">
                   <form id="add-animal-form">
                     <div class="mb-3">
-                      <label for="animal_name" class="form-label">Animal Name</label>
-                      <input type="text" class="form-control" id="animal_name" placeholder="Animal Name">
+                      <label for="animal-name" class="form-label">Animal Name</label>
+                      <input type="text" class="form-control" id="animal-name" placeholder="Animal Name">
                     </div>
                     <div class="mb-3">
                       <label for="species" class="form-label">Species</label>
@@ -66,11 +66,11 @@
                     </div>
                     <div class="mb-3">
                       <label for="birthdate" class="form-label">Birthdate</label>
-                      <input type="date" class="form-control" id="birthdate" placeholder="Birthdate">
+                      <input type="date" class="form-control" id="birthdate">
                     </div>
                     <div class="mb-3">
                       <label for="image" class="form-label">Image</label>
-                      <input type="file" class="form-control" id="image" placeholder="Image">
+                      <input type="file" class="form-control" id="image">
                     </div>
                     <!-- add checkbox to disable animal-location -->
                     <div class="mb-3">
@@ -128,8 +128,8 @@
                 <div class="accordion-body">
                   <form id="add-category-form">
                     <div class="mb-3">
-                      <label for="category_name" class="form-label">Category Name</label>
-                      <input type="text" class="form-control" id="category_name" placeholder="Category Name">
+                      <label for="category-name" class="form-label">Category Name</label>
+                      <input type="text" class="form-control" id="category-name" placeholder="Category Name">
                     </div>
                     <button type="submit" class="btn btn-primary">Submit</button>
                   </form>
@@ -137,13 +137,15 @@
               </div>
             </div>
           </div>
-          <div class="modal" tabindex="-1" id="animal-modal">
-            <div class="modal-dialog">
-              <div class="modal-content">
+        </div>
+      </div>
+      <div class="modal" tabindex="-1" id="animal-modal">
+        <div class="modal-dialog">
+          <div class="modal-content">
 
-              </div>
-            </div>
           </div>
+        </div>
+      </div>
     </main>
   </div>
 </body>

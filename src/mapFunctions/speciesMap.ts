@@ -9,7 +9,6 @@ const allSpeciesToMap = (
   map: L.Map,
   targetModal: Element,
 ) => {
-  console.log(speciesData.species);
   speciesData.species.forEach((species: any) => {
     const geojsonFeature: GeoJSON.Feature = {
       type: 'Feature',

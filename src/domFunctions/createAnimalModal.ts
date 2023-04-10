@@ -1,4 +1,8 @@
+const uploadURL = import.meta.env.VITE_FILE_URL;
+
 export default function (animal: any): string {
+  const image = animal.image ? uploadURL + animal.image : animal.species.image;
+
   const modalHtml = `
   <div class="modal-header">
     <h5 class="modal-title" id="exampleModalLabel">Animal: ${
@@ -9,7 +13,7 @@ export default function (animal: any): string {
   <div class="modal-body">
     <p>Species: ${animal.species.species_name}</p>
     <p>Category: ${animal.species.category.category_name}</p>
-    <img src="${animal.species.image}" alt="${
+    <img src="${image}" alt="${
     animal.species.species_name
   }" style="width: 100%;" />
     <p>Owner: ${animal.owner.user_name}</p>

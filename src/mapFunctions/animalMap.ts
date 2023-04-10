@@ -8,7 +8,6 @@ const allAnimalsToMap = (
   map: L.Map,
   targetModal: Element,
 ) => {
-  console.log(animalData.animals);
   animalData.animals.forEach((animal: any) => {
     const geojsonFeature: GeoJSON.Feature = {
       type: 'Feature',

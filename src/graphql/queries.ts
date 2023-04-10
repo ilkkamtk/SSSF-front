@@ -28,6 +28,7 @@ query Animals {
   animals {
     animal_name
     birthdate
+    image
     species {
       image
       species_name
@@ -90,6 +91,14 @@ mutation AddSpecies($speciesName: String!, $category: ID!, $location: InputPoint
 }
 `;
 
+const addAnimal = `
+mutation AddAnimal($animalName: String!, $species: ID!, $image: String!, $location: InputPoint!, $birthdate: DateTime!) {
+  addAnimal(animal_name: $animalName, species: $species, image: $image, location: $location, birthdate: $birthdate) {
+    animal_name
+  }
+}
+`;
+
 export {
   login,
   checkToken,
@@ -98,4 +107,5 @@ export {
   getAllCategories,
   addCategory,
   addSpecies,
+  addAnimal,
 };
