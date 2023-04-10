@@ -50,13 +50,15 @@ map.setView([0, 0], 1);
 const token = localStorage.getItem('token');
 
 if (token !== null) {
-  const isTokenValid = await doGraphQLFetch(apiURL, checkToken, {}, token);
-  if (isTokenValid.checkToken.message === 'Token valid') {
-    loginButton.parentElement!.classList.add('d-none');
-    logoutButton.parentElement!.classList.remove('d-none');
-    user.user_name = isTokenValid.checkToken.user.user_name;
-    updateUserPanel(user);
-  }
+  try {
+    const isTokenValid = await doGraphQLFetch(apiURL, checkToken, {}, token);
+    if (isTokenValid.checkToken.message === 'Token valid') {
+      loginButton.parentElement!.classList.add('d-none');
+      logoutButton.parentElement!.classList.remove('d-none');
+      user.user_name = isTokenValid.checkToken.user.user_name;
+      updateUserPanel(user);
+    }
+  } catch (error) {}
 }
 
 // update animals
